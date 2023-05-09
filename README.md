@@ -20,25 +20,14 @@ Ho realizzato il deploy di questa applicazione su Google Cloud Provider. Lo sche
 
 Questa sezione elenca ciascun componente necessario al deploy in cloud dell'applicazione.
 
-<details>
   <summary>Table of Contents</summary>
   <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
     <li><a href="#Container">Container</a></li>
     <li><a href="#Database">Database</a></li>
     <li><a href="#Google Cloud Run">Google Cloud Run</a></li>
     <li><a href="#Google Cloud Build">Google Cloud Build</a></li>
     <li><a href="#Google Alerts">Google Alerts</a></li>
   </ol>
-</details>
 
 ## Container
 
