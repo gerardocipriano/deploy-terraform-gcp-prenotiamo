@@ -2,7 +2,7 @@
 
 # Analisi
 
-Prenotiamo è un App web sviluppata in Nuxt3 che consente ai dipendenti la prenotazione del pranzo.
+<a href="https://github.com/gerardocipriano/prenotiamo">Prenotiamo</a> è un App web sviluppata in Nuxt3 che consente ai dipendenti la prenotazione del pranzo.
 By design, le applicazioni nuxt3 integrano in un unico progetto sia Frontend che Backend.
 Il Backend fa riferiemento ad un database mysql per la raccolta delle info (menu, ordini, aziende, etc).
 
