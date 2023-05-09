@@ -24,9 +24,9 @@ Questa sezione elenca ciascun componente necessario al deploy in cloud dell'appl
   <ol>
     <li><a href="#Container">Container</a></li>
     <li><a href="#Database">Database</a></li>
-    <li><a href="#Google Cloud Run">Google Cloud Run</a></li>
-    <li><a href="#Google Cloud Build">Google Cloud Build</a></li>
-    <li><a href="#Google Alerts">Google Alerts</a></li>
+    <li><a href="#Run">Google Cloud Run</a></li>
+    <li><a href="#Build">Google Cloud Build</a></li>
+    <li><a href="#Alerts">Google Alerts</a></li>
   </ol>
 
 ## Container
@@ -80,7 +80,10 @@ Usando Terraform, ho creato una risorsa google_cloud_run_v2_service chiamata pre
 
 Per maggiori dettagli sul codice, fare riferimento a https://github.com/gerardocipriano/deploy-terraform-gcp-prenotiamo/blob/7ab26a248b31017103d89cc07800ed77771a7af3/google_sql.tf
 
-## Google Cloud Run
+## Run
+
+Ho scelto di utilizzare Cloud Run invece di GKE per diversi motivi. Innanzitutto, Cloud Run è più economico perché si paga solo per il tempo di elaborazione effettivamente utilizzato. Inoltre, Cloud Run è più facile da configurare e gestire rispetto a GKE perché non è necessario gestire un cluster Kubernetes.
+Cloud Run inoltre è integrato molto bene con il servizio Cloud Build (prossima sezione) che garantisce una pipeline di CI/CD. In Cloud Run l'HA, l'accesso e la disponibilità sono configurati e gestiti in modo completamente trasparente da GCP.
 
 Tutti gli aspetti di creazione, gestione e distruzione di Google Cloud Run sono stati completamente automatizzati utilizzando Terraform.
 
@@ -92,15 +95,13 @@ Nel blocco containers, ho specificato l’immagine Docker da utilizzare per il n
 
 Infine, ho creato una risorsa google_cloud_run_service_iam_member per concedere l’accesso pubblico al nostro servizio Cloud Run. L'accesso al servizio, anche in questo caso, è completamente gestito dal provider tramite un suo load balancer (per noi il processo è trasparente).
 
-Ho scelto di utilizzare Cloud Run invece di GKE per diversi motivi. Innanzitutto, Cloud Run è più economico perché si paga solo per il tempo di elaborazione effettivamente utilizzato. Inoltre, Cloud Run è più facile da configurare e gestire rispetto a GKE perché non è necessario gestire un cluster Kubernetes.
-Cloud Run inoltre è integrato molto bene con il servizio Cloud Build (prossima sezione) che garantisce una pipeline di CI/CD
-
 Per maggiori dettagli sul codice, fare riferimento a https://github.com/gerardocipriano/deploy-terraform-gcp-prenotiamo/blob/8d008d3ace546964e504e5abe00e4ece4408e0f2/google_run.tf
 
 ## Google Cloud Build
 
-Ho creato una risorsa google_cloudbuild_trigger chiamata prenotiamo_trigger. Questa risorsa rappresenta un trigger di Cloud Build che si attiverà quando viene eseguito un push sul branch specificato del repository GitHub specificato.
+Google Cloud Build si occupa di gestire la parte di CI/CD. Grazie a cloud build l'immagine del container viene aggiornata e deployata in modo automatico.
 
+Ho creato una risorsa google_cloudbuild_trigger chiamata prenotiamo_trigger. Questa risorsa rappresenta un trigger di Cloud Build che si attiverà quando viene eseguito un push sul branch specificato del repository GitHub specificato (quello di prenotiamo).
 Nel blocco github, ho specificato il proprietario e il nome del repository GitHub da collegare a Cloud Build. Ho anche specificato il branch del repository da monitorare per i push. Questi valori sono impostati utilizzando le variabili github_owner, github_repo_name e github_branch.
 
 Ho anche specificato il nome del file di configurazione di Cloud Build da utilizzare per il trigger. In questo caso, ho impostato il valore a cloudbuild.yaml, il che significa che Cloud Build utilizzerà il file cloudbuild.yaml nella radice del repository GitHub per definire i passaggi di compilazione.
@@ -124,7 +125,7 @@ steps:
 
 Per maggiori dettagli sul codice, fare riferimento a https://github.com/gerardocipriano/deploy-terraform-gcp-prenotiamo/blob/8d008d3ace546964e504e5abe00e4ece4408e0f2/google_build_trigger.tf
 
-## Google Alerts
+## Alerts
 
 Ho creato diverse risorse google_monitoring_alert_policy per configurare avvisi di monitoraggio per il nostro servizio Cloud Run e il nostro database Cloud SQL.
 
