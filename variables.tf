@@ -52,3 +52,17 @@ variable "cookie_name" {
   type        = string
   description = "The name of the cookie used for authentication"
 }
+variable "github_owner" {
+  description = "The GitHub owner of the repository to connect to Cloud Build."
+  type        = string
+}
+
+variable "github_repo_name" {
+  description = "The name of the GitHub repository to connect to Cloud Build."
+  type        = string
+}
+
+variable "github_branch" {
+  description = "The branch of the GitHub repository to trigger Cloud Build on push."
+  type        = string
+}
