@@ -12,7 +12,7 @@ Ho realizzato il deploy di questa applicazione su Google Cloud Provider. Lo sche
 
 <div align="center">
   <a href="https://github.com/gerardocipriano/prenotiamo">
-    <img src="src/public/img/logo.png" alt="Logo" width="200">
+    <img src="scheme.png" alt="scheme">
   </a>
 </div>
 
