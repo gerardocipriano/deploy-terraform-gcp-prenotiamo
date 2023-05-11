@@ -203,5 +203,8 @@ ALTER TABLE `user`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 
+SELECT CONCAT('GRANT SELECT ON prenotiamo.', table_name, ' TO ''prenotiamo_svc_ws''@''%'';') 
+FROM information_schema.tables 
+WHERE table_schema = 'prenotiamo';
 
 
