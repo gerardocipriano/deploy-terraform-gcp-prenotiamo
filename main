@@ -1,7 +1,7 @@
 provider "google" {
   credentials = file("prenotiamo-52276ba2c593.json")
   project = var.my-project
-  region  = "asia-east1"
+  region  = var.location
 }
 
 data "google_client_config" "default" {}
@@ -88,7 +88,7 @@ provider "kubernetes" {
 
 resource "google_storage_bucket" "sql_bucket" {
   name     = "prenotiamo-sql-bucket"
-  location = "asia-east1"
+  location = var.location
   force_destroy = true
 
 }
@@ -96,7 +96,7 @@ resource "google_storage_bucket" "sql_bucket" {
 resource "google_sql_database_instance" "prenotiamo_instance" {
   name             = "prenotiamo-instance"
   database_version = "MYSQL_5_7"
-  region           = "asia-east1"
+  region           = var.location
   deletion_protection = false
 
   settings {
