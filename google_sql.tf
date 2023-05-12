@@ -2,7 +2,7 @@
 resource "google_sql_database_instance" "prenotiamo_instance" {
   name              = "prenotiamo-instance"
   database_version  = "MYSQL_5_7"
-  region            = "asia-east1"
+  region            = var.location
   deletion_protection = false
 
   settings {

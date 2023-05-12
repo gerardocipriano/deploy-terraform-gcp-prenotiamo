@@ -66,3 +66,9 @@ variable "github_branch" {
   description = "The branch of the GitHub repository to trigger Cloud Build on push."
   type        = string
 }
+
+variable "location" {
+  description = "Default location where resources are deployed"
+  type = string
+  
+}
