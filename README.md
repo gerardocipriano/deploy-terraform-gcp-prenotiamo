@@ -131,8 +131,6 @@ Per maggiori dettagli sul codice, fare riferimento a https://github.com/gerardoc
 
 Sono state create diverse risorse di google_monitoring_alert_policy per configurare gli avvisi di monitoraggio per il servizio Cloud Run e il database Cloud SQL. In particolare, è stata creata una risorsa google_monitoring_alert_policy chiamata cloud_run_errors per configurare l'avviso relativo al numero elevato di errori del server. Il filtro è stato impostato per contare solo le richieste con codici di risposta 5xx e la soglia a 10 richieste in un periodo di 300 secondi. È stato anche specificato un canale di notifica email per ricevere notifiche quando l'avviso viene attivato.
 
-Ho creato un alert che scatta quando il liveness probe dell'istanza su Run rileva un problema e quindi crea una nuova istanza del container.
-
 Inoltre, è stata creata una risorsa google_monitoring_alert_policy chiamata cloud_run_latency per configurare l'avviso per la latenza elevata del servizio Cloud Run. Il filtro è stato impostato per misurare la latenza delle richieste e la soglia a 300 ms in un periodo di 60 secondi. Anche in questo caso, è stato specificato un canale di notifica email per ricevere notifiche quando l'avviso viene attivato.
 
 È stata anche creata una risorsa google_monitoring_alert_policy chiamata cloud_sql_cpu per configurare l'avviso per l'utilizzo elevato della CPU del database Cloud SQL. Il filtro è stato impostato per misurare l'utilizzo della CPU e la soglia al 90% in un periodo di 300 secondi. Anche in questo caso, è stato specificato un canale di notifica email per ricevere notifiche quando l'avviso viene attivato.

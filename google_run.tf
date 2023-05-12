@@ -72,6 +72,7 @@ resource "google_cloud_run_v2_service" "prenotiamo" {
         initial_delay_seconds = 150
         failure_threshold = 5
         timeout_seconds = 60
+        period_seconds = 60
       }
     }
   }
