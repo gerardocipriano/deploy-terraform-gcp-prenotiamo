@@ -1,12 +1,9 @@
 resource "google_cloud_run_v2_service" "prenotiamo" {
   provider = google-beta
   name     = var.my-project
-  location = "asia-east1"
+  location = var.location
 
   template {
-    annotations = {
-      "run.googleapis.com/revision-limit" = "3"
-    }
     scaling {
       max_instance_count = 5
       min_instance_count = 1
@@ -59,7 +56,7 @@ resource "google_cloud_run_v2_service" "prenotiamo" {
       }
       resources {
         startup_cpu_boost = true
-        cpu_idle          = false
+        cpu_idle          = true
         limits = {
           cpu    = "2"
           memory = "2Gi"
@@ -67,6 +64,14 @@ resource "google_cloud_run_v2_service" "prenotiamo" {
       }
       ports {
         container_port = 8080
+      }
+      liveness_probe {
+        http_get {
+          path = "/"
+        }
+        initial_delay_seconds = 150
+        failure_threshold = 5
+        timeout_seconds = 60
       }
     }
   }
