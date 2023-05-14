@@ -63,9 +63,9 @@ Dopo aver correttamente verificato il funzionamento del nuovo container, tramite
 
 ## Database
 
-Tutti gli aspetti di creazione, gestione e distruzione del Database sono stati completamente automatizzati utilizzando Terraform. È stata creata una risorsa google_sql_database_instance chiamata prenotiamo_instance in una location generica. Questa risorsa rappresenta un'istanza di database Cloud SQL per MySQL.
+Tutti gli aspetti di creazione, gestione e distruzione del Database sono stati completamente automatizzati utilizzando Terraform. È stata creata una risorsa google_sql_database_instance chiamata prenotiamo_instance in una determinata location. Questa risorsa rappresenta un'istanza di database Cloud SQL per MySQL.
 
-La versione del database è stata impostata a MYSQL_5_7 e la protezione dall'eliminazione è stata disabilitata. Sono state configurate anche le impostazioni del database, come il livello di servizio db-f1-micro, il tipo di disponibilità REGIONAL per garantire l'HA dell'istanza e la configurazione del backup.
+La versione del database è stata impostata a MYSQL_5_7. Sono state configurate anche le impostazioni del database, come il livello di servizio db-f1-micro (condiviso, il più economico) e il tipo di disponibilità REGIONAL **per garantire l'HA dell'istanza e la configurazione del backup**.
 
 Sono state impostate alcune flag del database, come il timeout di attesa e il numero massimo di connessioni.
 
@@ -75,19 +75,17 @@ Infine, è stata creata una risorsa null_resource per inizializzare il database.
 
 In future versioni del progetto, si vorrebbe rimuovere l'accesso pubblico al database e sfruttare unicamente l'indirizzamento privato interno per far dialogare WebApp e DB.
 
-È stata scelta un'istanza gestita di Cloud SQL invece di creare una propria istanza di database perché è più facile da configurare e gestire. Cloud SQL gestisce automaticamente le attività di manutenzione, come i backup e gli aggiornamenti, in modo da non dover gestirle manualmente.
-
-È stata utilizzata Terraform per creare una risorsa google_cloud_run_v2_service chiamata prenotiamo in una location generica. Questa risorsa rappresenta un servizio Cloud Run che eseguirà l'applicazione.
+Ho scelto un'istanza gestita di Cloud SQL invece di creare una propria istanza di database perché è più facile da configurare e gestire. Cloud SQL gestisce automaticamente le attività di manutenzione, come i backup e gli aggiornamenti, in modo da non dover gestirle manualmente.
 
 Per maggiori dettagli sul codice, fare riferimento a https://github.com/gerardocipriano/deploy-terraform-gcp-prenotiamo/blob/7ab26a248b31017103d89cc07800ed77771a7af3/google_sql.tf
 
 ## Run
 
-Per diversi motivi ho scelto di utilizzare Cloud Run invece di GKE. Innanzitutto, Cloud Run è più economico poiché si paga solo per il tempo di elaborazione effettivamente utilizzato e non richiede la gestione di un cluster Kubernetes. Inoltre, Cloud Run è più facile da configurare e gestire rispetto a GKE.
+Tutti gli aspetti di creazione, gestione e distruzione di Google Cloud Run sono stati completamente automatizzati tramite l'utilizzo di Terraform.
+
+Ci sono diversi motivi per cui ho scelto di utilizzare Cloud Run invece di GKE. Innanzitutto, Cloud Run è più economico poiché si paga solo per il tempo di elaborazione effettivamente utilizzato e non richiede la gestione di un cluster Kubernetes. Inoltre, Cloud Run è più facile da configurare e gestire rispetto a GKE.
 
 Cloud Run è anche ben integrato con il servizio Cloud Build per garantire una pipeline di CI/CD, ed è completamente gestito da GCP per l'HA, l'accesso e la disponibilità.
-
-Tutti gli aspetti di creazione, gestione e distruzione di Google Cloud Run sono stati completamente automatizzati tramite l'utilizzo di Terraform.
 
 È stata creata una risorsa chiamata "prenotiamo" nella regione specificata. Questa risorsa rappresenta un servizio Cloud Run che eseguirà la nostra applicazione.
 
@@ -104,7 +102,7 @@ Per maggiori dettagli sul codice, fare riferimento a https://github.com/gerardoc
 
 Google Cloud Build gestisce la parte di CI/CD, consentendo l'aggiornamento e il deployment automatico dell'immagine del container.
 
-È stata creata una risorsa chiamata "prenotiamo_trigger", rappresentante un trigger di Cloud Build che si attiva in seguito all'esecuzione di un push sul branch specificato del repository GitHub. Nel blocco "github" sono stati specificati il proprietario e il nome del repository GitHub da collegare a Cloud Build, nonché il branch da monitorare per i push. Questi valori sono stati impostati utilizzando le variabili "github_owner", "github_repo_name" e "github_branch".
+È stata creata una risorsa chiamata "prenotiamo_trigger"; questa risorsa è un trigger di Cloud Build che si attiva in seguito all'esecuzione di un push sul branch specificato del repository GitHub. Nel blocco "github" sono stati specificati il proprietario e il nome del repository GitHub da collegare a Cloud Build, nonché il branch da monitorare per i push. Questi valori sono stati impostati utilizzando le variabili "github_owner", "github_repo_name" e "github_branch".
 
 È stato inoltre specificato il nome del file di configurazione di Cloud Build da utilizzare per il trigger, che in questo caso è "cloudbuild.yaml". Ciò significa che Cloud Build utilizzerà il file "cloudbuild.yaml" nella radice del repository GitHub per definire i passaggi di compilazione.
 
@@ -137,7 +135,7 @@ Inoltre, è stata creata una risorsa google_monitoring_alert_policy chiamata clo
 
 Infine, è stata creata una risorsa google_monitoring_notification_channel chiamata email per configurare un canale di notifica email. È stato specificato un indirizzo email, anche se sarebbe opportuno utilizzare una DL o una SharedMailbox.
 
-Infine, per rendere il monitoraggio più fruibile, ho concentrato diverse metriche all'interno di una Dashboard:
+Per rendere il monitoraggio più fruibile, ho concentrato diverse metriche all'interno di una Dashboard:
 
 <img src="dashboard.png" alt="dashboard">
 
