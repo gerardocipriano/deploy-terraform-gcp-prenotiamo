@@ -1,7 +1,13 @@
-resource "google_cloud_run_v2_service" "prenotiamo" {
+locals {
+  locations = ["europe-west12", "europe-west4"]
+}
+
+resource "google_cloud_run_v2_service" "service" {
   provider = google-beta
-  name     = var.my-project
-  location = var.location
+  for_each = toset(local.locations)
+
+  name     = "service-${each.key}"
+  location = each.key
 
   template {
     scaling {
@@ -70,9 +76,9 @@ resource "google_cloud_run_v2_service" "prenotiamo" {
           path = "/"
         }
         initial_delay_seconds = 150
-        failure_threshold = 5
-        timeout_seconds = 60
-        period_seconds = 60
+        failure_threshold     = 5
+        timeout_seconds       = 60
+        period_seconds        = 60
       }
     }
   }
@@ -88,9 +94,17 @@ resource "google_cloud_run_v2_service" "prenotiamo" {
   ]
 }
 
-resource "google_cloud_run_service_iam_member" "public" {
-  service  = google_cloud_run_v2_service.prenotiamo.name
-  location = google_cloud_run_v2_service.prenotiamo.location
-  role     = "roles/run.invoker"
-  member   = "allUsers"
+data "google_iam_policy" "noauth" {
+  binding {
+    role    = "roles/run.invoker"
+    members = ["allUsers"]
+  }
+}
+
+resource "google_cloud_run_service_iam_policy" "noauth" {
+  for_each = toset(local.locations)
+
+  service     = google_cloud_run_v2_service.service[each.key].name
+  location    = google_cloud_run_v2_service.service[each.key].location
+  policy_data = data.google_iam_policy.noauth.policy_data
 }

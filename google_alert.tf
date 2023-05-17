@@ -1,14 +1,16 @@
-resource "google_monitoring_alert_policy" "cloud_run_errors" {
-  display_name = "Cloud Run Errors"
+resource "google_monitoring_alert_policy" "cloud_run_alert_policy" {
+  provider = google-beta
+  for_each = toset(local.locations)
+
+  display_name = "Cloud Run Errors ${each.key}"
   combiner     = "OR"
 
   conditions {
     display_name = "High number of server errors"
-
     condition_threshold {
-      filter     = "metric.type=\"run.googleapis.com/request_count\" AND resource.type=\"cloud_run_revision\" AND metric.label.response_code_class=\"5xx\""
-      duration   = "300s"
-      comparison = "COMPARISON_GT"
+      filter          = "metric.type=\"run.googleapis.com/request_count\" AND resource.type=\"cloud_run_revision\" AND metric.label.response_code_class=\"5xx\" AND metadata.user_labels.\"cloud.googleapis.com/location\"=\"${each.key}\""
+      duration        = "300s"
+      comparison      = "COMPARISON_GT"
       threshold_value = 10
       trigger {
         count = 1
@@ -23,20 +25,22 @@ resource "google_monitoring_alert_policy" "cloud_run_errors" {
   notification_channels = [
     google_monitoring_notification_channel.email.name,
   ]
-    depends_on = [
-    google_cloud_run_v2_service.prenotiamo
+  depends_on = [
+    google_cloud_run_v2_service.service
   ]
 }
 
 resource "google_monitoring_alert_policy" "cloud_run_latency" {
-  display_name = "Cloud Run Latency Alert"
+  provider     = google-beta
+  for_each     = toset(local.locations)
+  display_name = "Cloud Run Latency Alert ${each.key}"
   combiner     = "OR"
 
   conditions {
     display_name = "Latency exceeds 300ms"
 
     condition_threshold {
-      filter     = "metric.type=\"run.googleapis.com/request_latencies\" resource.type=\"cloud_run_revision\""
+      filter     = "metric.type=\"run.googleapis.com/request_latencies\" resource.type=\"cloud_run_revision\" AND metadata.user_labels.\"cloud.googleapis.com/location\"=\"${each.key}\""
       duration   = "60s"
       comparison = "COMPARISON_GT"
 
@@ -54,6 +58,9 @@ resource "google_monitoring_alert_policy" "cloud_run_latency" {
 
   notification_channels = [
     google_monitoring_notification_channel.email.name
+  ]
+  depends_on = [
+    google_cloud_run_v2_service.service
   ]
 }
 

@@ -82,21 +82,23 @@ Per maggiori dettagli sul codice, fare riferimento a https://github.com/gerardoc
 ## Run
 
 Tutti gli aspetti di creazione, gestione e distruzione di Google Cloud Run sono stati completamente automatizzati tramite l'utilizzo di Terraform.
+Grazie ad un ciclo Terraform, sono stato in grado di iterare la creazione della risorsa su due region (eu-west12 e eu-west4) diverse, senza duplicazioni di codice.
 
 Ci sono diversi motivi per cui ho scelto di utilizzare Cloud Run invece di GKE. Innanzitutto, Cloud Run è più economico poiché si paga solo per il tempo di elaborazione effettivamente utilizzato e non richiede la gestione di un cluster Kubernetes. Inoltre, Cloud Run è più facile da configurare e gestire rispetto a GKE.
 
-Cloud Run è anche ben integrato con il servizio Cloud Build per garantire una pipeline di CI/CD, ed è completamente gestito da GCP per l'HA, l'accesso e la disponibilità.
+Cloud Run è anche ben integrato con il servizio Cloud Build per garantire una pipeline di CI/CD.
 
 È stata creata una risorsa chiamata "prenotiamo" nella regione specificata. Questa risorsa rappresenta un servizio Cloud Run che eseguirà la nostra applicazione.
 
 Ho anche configurato l'autoscaling, dove i criteri sono gestiti automaticamente da GCP, con un minimo di 1 istanza e un massimo di 5 istanze.
 
 Nel blocco "containers", ho specificato l'immagine Docker da utilizzare per il nostro servizio e ho impostato diverse variabili d'ambiente per la configurazione dell'applicazione. Dopo diversi test, ho impostato i limiti di risorse per la CPU e la memoria a 2 e 2 GB, rispettivamente.
-Inoltre, ho configurato una sonda per monitorare il servizio nel container; se dovesse bloccarsi, la sonda lo rileverebbe  e creerebbe subito una nuova istanza funzionante.
+Inoltre, ho configurato una sonda per monitorare il servizio nel container; se dovesse bloccarsi, la sonda lo rileverebbe e creerebbe subito una nuova istanza funzionante.
 
-Infine, è stata creata una risorsa per concedere l'accesso pubblico al nostro servizio Cloud Run. L'accesso al servizio, come detto in precedenza, è completamente gestito dal provider tramite un suo load balancer.
+Come accennato in precendenza, ho garantito l’alta disponibilità eseguendo il deploy in due Region diverse e gestendo il traffico esterno con un IP Statico e un Global Cloud Load Balancer (Premium). Il Load Balancer indirizza le richieste esterne ad una delle due istanze nelle region in cui il servizio è deployato. Il livello Premium garantisce prestazioni elevate in termini di raggiungibilità della webapp (sfrutta a pieno la dorsale di rete Google). Ho anche aggiunto una CDN per aumentare ulteriormente le prestazioni di caricamento delle risorse.
 
 Per maggiori dettagli sul codice, fare riferimento a https://github.com/gerardocipriano/deploy-terraform-gcp-prenotiamo/blob/8d008d3ace546964e504e5abe00e4ece4408e0f2/google_run.tf
+Per dettagli sul codice del load balancer: https://github.com/gerardocipriano/deploy-terraform-gcp-prenotiamo/blob/8d008d3ace546964e504e5abe00e4ece4408e0f2/google_global_load_balancer.tf
 
 ## Google Cloud Build
 
@@ -112,22 +114,29 @@ steps:
     args: ["builds", "submit", "--tag", "gcr.io/$PROJECT_ID/prenotiamo-image"]
   - name: "gcr.io/cloud-builders/gcloud"
     args:
-      [
-        "run",
-        "deploy",
-        "prenotiamo",
-        "--image",
-        "gcr.io/$PROJECT_ID/prenotiamo-image",
-        "--region",
-        var.location,
-      ]
+      - "run"
+      - "deploy"
+      - "service-europe-west12"
+      - "--image"
+      - "gcr.io/$PROJECT_ID/prenotiamo-image"
+      - "--region"
+      - "europe-west12"
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "service-europe-west4"
+      - "--image"
+      - "gcr.io/$PROJECT_ID/prenotiamo-image"
+      - "--region"
+      - "europe-west4"
 ```
 
 Per maggiori dettagli sul codice, fare riferimento a https://github.com/gerardocipriano/deploy-terraform-gcp-prenotiamo/blob/8d008d3ace546964e504e5abe00e4ece4408e0f2/google_build_trigger.tf
 
 ## Alerts
 
-Sono state create diverse risorse di google_monitoring_alert_policy per configurare gli avvisi di monitoraggio per il servizio Cloud Run e il database Cloud SQL. In particolare, è stata creata una risorsa google_monitoring_alert_policy chiamata cloud_run_errors per configurare l'avviso relativo al numero elevato di errori del server. Il filtro è stato impostato per contare solo le richieste con codici di risposta 5xx e la soglia a 10 richieste in un periodo di 300 secondi. È stato anche specificato un canale di notifica email per ricevere notifiche quando l'avviso viene attivato.
+Sono state create diverse risorse di google_monitoring_alert_policy per configurare gli avvisi di monitoraggio per il servizio Cloud Run (in entrambe le region in cui ho deployato il servizio) e il database Cloud SQL. In particolare, è stata creata una risorsa google_monitoring_alert_policy chiamata cloud_run_errors per configurare l'avviso relativo al numero elevato di errori del server. Il filtro è stato impostato per contare solo le richieste con codici di risposta 5xx e la soglia a 10 richieste in un periodo di 300 secondi. È stato anche specificato un canale di notifica email per ricevere notifiche quando l'avviso viene attivato.
 
 Inoltre, è stata creata una risorsa google_monitoring_alert_policy chiamata cloud_run_latency per configurare l'avviso per la latenza elevata del servizio Cloud Run. Il filtro è stato impostato per misurare la latenza delle richieste e la soglia a 300 ms in un periodo di 60 secondi. Anche in questo caso, è stato specificato un canale di notifica email per ricevere notifiche quando l'avviso viene attivato.
 
@@ -154,5 +163,3 @@ Questo esame mi ha anche permesso di consolidare le mie competenze su Docker e K
 Infine, avrei voluto distribuire Cloud Run su diverse regioni. Tuttavia, ho avuto problemi nella configurazione del load balancer (probabilmente legati al redirect tra HTTP e HTTPS) che non sono riuscito a risolvere. Per questo motivo ho deciso di mantenere la distribuzione semplicemente su una sola regione.
 
 In generale, sono molto soddisfatto del lavoro che ho fatto e delle competenze che ho acquisito. So che ci sono ancora molte cose da imparare e migliorare, ma questo progetto mi ha dato una solida base su cui costruire il mio futuro professionale.
-
-

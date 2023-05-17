@@ -1,11 +1,11 @@
 provider "google" {
-  credentials = file("prenotiamo-a6ac8880af6d.json")
+  credentials = file("prenotiamo-52276ba2c593.json")
   project     = var.my-project
   region      = var.location
 }
 
 provider "google-beta" {
-  credentials = file("prenotiamo-a6ac8880af6d.json")
+  credentials = file("prenotiamo-52276ba2c593.json")
   project     = var.my-project
   region      = var.location
 }
